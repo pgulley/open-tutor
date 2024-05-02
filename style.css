@@ -1,0 +1,188 @@
+body {
+
+	background-color:#d1dbe4;
+	height:400%;
+}
+
+.path_selector{
+	width:100%;
+	min-height:100%;
+	text-align: center;
+	margin-top:10%;
+	white-space: nowrap;
+	margin-bottom:20em;
+}
+
+.task_hero{
+	white-space:normal;
+	display:inline-block;
+	border: 2px solid black;
+	border-radius: 3px;
+	width:20%;
+	margin:20px;
+	padding-right:5px;
+	box-shadow: 6px 12px 4px #aeaeae;
+	height:10em;
+
+}
+
+.icon_column{
+	width: 2em;
+	float:left;
+	font-size:.75em;
+	padding-right:1em;
+
+}
+
+.lo_icon{
+	margin:3px;
+	border: 1px solid transparent;
+	border-radius: 2px;
+}
+
+
+
+.icon_ok{
+	background-color:white;
+	color: #169116;
+	border: 1px solid white;
+	border-radius: 2px;
+
+}
+
+.icon_active{
+	color: white;
+	border: 1px solid white;
+	border-radius: 2px;
+}
+
+
+.comfortaa-header {
+  font-family: "Comfortaa", sans-serif;
+  font-optical-sizing: auto;
+  font-weight: 500;
+  font-style: normal;
+  font-size: 2em;
+  padding:1.5em 0;
+}
+
+
+.green{
+	background-color: #7aba99;
+}
+
+.pink{
+	background-color: #b57f9b;
+}
+
+.blue{
+	background-color: #7593af;
+}
+
+
+.task1{
+	background-color:#92ba92
+}
+.task2{
+	background-color:#738cd7;
+}
+
+.task3{
+	background-color:#f2adb2;
+}
+
+.task4{
+	background-color: #b463bb;
+}
+
+.icon_header{
+	display: inline-block;
+	font-size:2em;
+	float:left;
+}
+.lesson_title{
+	width:90%;
+	margin:auto;
+	padding:10px;
+	border-radius:10px;
+	line-height:100%;
+}
+
+
+.task_container{
+	border-left:2px solid black;
+	border-right:2px solid black;
+	border-radius:2px;
+	width:60%;
+	margin:auto;
+	margin-top:5px;
+}
+
+.kode-mono-llm {
+  font-family: "Kode Mono", monospace;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.crimson-text-regular {
+  font-family: "Crimson Text", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+
+.question{
+	text-align:left;
+	white-space:normal;
+	padding:10px;
+	margin:10px;
+	font-size:1.5em;
+}
+
+.hint{
+	text-indent:50px;
+	text-align:left;
+	white-space:normal;
+	padding:10px;
+	margin:10px;
+	font-size:1em;
+}
+
+.answer{
+	text-align:left;
+	white-space:normal;
+	padding:10px;
+	margin:10px;
+	background:white;
+	border-radius:10px;
+}
+
+.answer_prompt{
+
+}
+
+.answer_area{
+	text-indent:50px;
+	width:100%;
+	margin-bottom:10px;
+	
+}
+
+.almost{
+	color:#8daa00;
+}
+
+.interaction{
+	margin-left:85%;
+}
+
+button{
+	background-color: #d1dbe4;
+}
+
+textarea{
+	
+	outline:none;
+	resize:none;
+}
