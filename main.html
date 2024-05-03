@@ -1,0 +1,231 @@
+<html>
+	<head>
+		<link rel="stylesheet" href="style.css">
+		<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+		<link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Comfortaa:wght@300..700&family=Crimson+Text:ital,wght@0,400;0,600;0,700;1,400;1,600;1,700&family=Kode+Mono:wght@400..700&display=swap" rel="stylesheet">
+		<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+	</head>
+	<body>
+
+	<div id="app">
+		<lesson v-for="l in lessons"
+				:kc_options=l.kc_options>
+					
+		</lesson>
+	</div>
+
+	<script>
+	const { createApp, ref } = Vue
+
+	app = createApp({
+	  	data(){
+	  		return{
+	  			lessons:[]
+	  		}
+	  	},
+
+	  	methods: {
+	  		async getFirstLessons(){
+				const res = await fetch("http://127.0.0.1:5000/get_recs");
+				const finalRes = await res.json();
+				this.lessons = [{kc_options:finalRes}]
+	  		}
+	  	},
+	  	mounted(){
+	  		this.getFirstLessons()
+	  	}
+	})
+
+	app.component("lesson", {
+	  	props:['kc_options'],
+	  	template:`
+		  	<div class="lesson">
+				<div class="comfortaa lesson_header">
+					Select a lesson
+				</div>
+				<KC v-for="k in kc_options "
+						:title=k.title
+						:id=k.id
+						:is_active=true
+					@selected='handleKcSelected'
+				>
+				</KC>
+				<InnerLoop v-if="selected" :kc=selected_kc> 
+				</InnerLoop>
+			</div>`,
+		mounted(){
+			console.log(this.kc_options)
+		},
+		data(){
+			return{
+				selected:false,
+				selected_kc:"",
+
+			}
+		},
+		methods:{
+			handleKcSelected(kc){
+				if(!this.selected){
+					this.selected_kc = kc
+					this.selected = true
+				}	
+
+			}
+		}
+	})
+
+	///UNDER CONSTRUCTION I GUESS
+	app.component("LearningObjective",{
+		props:["level", "status"]
+		template:`<span class="material-symbols-outlined lo_icon" :class="status">{{ symbol_name() }}</span>`
+		methods:{
+			symbol_name(){
+				switch(this.level){
+					case "knowledge":
+						return "emoji_objects"
+					case "understand":
+						return "search_check"
+					case "apply":
+						return "architecture"
+					case "analyze":
+						return "psychology"
+				}
+			}
+		}
+	})
+
+	app.component("KC", {
+	  	props:["title", "id", "is_active"],
+	  	template:`<div class="task_hero" :style="{ 'background-color': bg }" @click="select">
+			<div class="icon_column">
+				<span class="material-symbols-outlined lo_icon icon_ok">emoji_objects</span>
+				<span class="material-symbols-outlined lo_icon icon_active">search_check</span>
+				<span class="material-symbols-outlined lo_icon">architecture</span>
+				<span class="material-symbols-outlined lo_icon">psychology</span>
+			</div>
+			<div class="kc_title comfortaa">
+				 {{ title }}
+			</div>
+		</div>`,
+		data(){
+			return{
+				was_chosen: false,
+				bg: ""
+			}
+		},
+		methods:{
+			getBg(){
+				if(this.is_chosen || this.is_active){
+					return hash_to_bg(this.id)
+				}
+				else{
+					return "#DF1203"
+				}
+				
+			},
+			select(){
+				this.is_chosen = true
+				this.$emit('selected', this)
+			}
+		},
+		mounted(){
+			this.bg = this.getBg() 
+		}
+	})
+
+	app.component("InnerLoop",{
+	  	props:["kc"],
+	  	template:`
+	  	<div class="question_title comfortaa" :style="{ 'background-color': bg }"> 
+			<span class="material-symbols-outlined lo_icon icon_header icon_active">architecture</span> Knowledge: {{ kc.title }}
+		</div>
+		<div class="task_container">
+			<Interaction v-for="i in interactions"
+				:kc_id=i.kc_id
+				:type=i.type>
+			</Interaction>
+		</div>
+	  	`,
+	  	mounted(){
+	  		this.bg = hash_to_bg(this.kc.id)
+	  	
+	  	},
+	  	data(){
+			return{
+				bg: "",
+				interactions:[{type:"question", kc_id:this.kc.id}]
+			}
+		},
+	})
+
+	
+	app.component("Interaction", {
+	 	props:['type', 'kc_id'],
+	 	template:`
+	 	<div class="question kode-mono-llm">
+			{{ tutor_text }}	
+		</div>
+		
+		<div v-if="loaded" class="answer crimson-text-regular">
+			
+			<textarea class="answer_area crimson-text-regular" placeholder="Answer:"> </textarea>
+			<div class="interaction "> <button> Submit </button> </div>
+		</div>
+	 	`,
+	 	methods:{
+	 		async getQuestion(){
+	  			
+	  			const res = await fetch("http://127.0.0.1:5000/choose_kc", {method:"POST", body:this.kc_id})
+				const finalRes = await res.json()
+				
+				for(letter of finalRes["question"]){
+					await delay(20)
+					this.tutor_text += letter
+				}
+				await delay(50)
+				this.loaded = true
+	  		},
+	 	},
+	 	mounted(){
+	 		this.getQuestion()
+	 	},
+	 	data(){
+	 		return{
+	 			loaded:false,
+	 			submitted:false,
+	 			tutor_text:""
+
+	 		}
+	 	}
+	})
+
+	delay = ms => new Promise(res => setTimeout(res, ms));
+	hash_to_bg = function(hash){
+		switch( parseInt(hash)%3 ){
+			case 0:
+				return '#7aba99'
+			case 1:
+				return '#b57f9b'
+			case 2:
+				return '#7593af'
+			}		
+		}
+
+	//components:
+	// lesson
+	// 	knowledge_component_icon - KC
+	// 	inner_loop
+	//   interaction
+	//     - question
+	//     - hint
+	//     - end
+
+
+	app.mount('#app')
+
+	</script>
+
+	</body>
+</html>

@@ -4,11 +4,10 @@ body {
 	height:400%;
 }
 
-.path_selector{
+.lesson{
 	width:100%;
 	min-height:100%;
 	text-align: center;
-	margin-top:10%;
 	white-space: nowrap;
 	margin-bottom:20em;
 }
@@ -18,16 +17,20 @@ body {
 	display:inline-block;
 	border: 2px solid black;
 	border-radius: 3px;
-	width:20%;
+	width:14%;
 	margin:20px;
 	padding-right:5px;
 	box-shadow: 6px 12px 4px #aeaeae;
 	height:10em;
+	vertical-align: top;
+}
 
+.task_hero:hover{
+	box-shadow: 12px 12px 4px #aeaeae;
 }
 
 .icon_column{
-	width: 2em;
+	width: 1em;
 	float:left;
 	font-size:.75em;
 	padding-right:1em;
@@ -57,15 +60,27 @@ body {
 }
 
 
-.comfortaa-header {
+.comfortaa {
   font-family: "Comfortaa", sans-serif;
   font-optical-sizing: auto;
-  font-weight: 500;
-  font-style: normal;
-  font-size: 2em;
-  padding:1.5em 0;
+
 }
 
+.lesson_header{
+	font-weight: 500;
+	font-style: normal;
+  	font-size: 2em;
+	padding:1em 0;
+}
+
+.kc_title{
+	font-weight: 500;
+	font-style: normal;
+	font-size: 1.3em;
+	padding:1.5em 0;
+	display:block;
+
+}
 
 .green{
 	background-color: #7aba99;
@@ -100,12 +115,16 @@ body {
 	font-size:2em;
 	float:left;
 }
-.lesson_title{
+
+.question_title{
 	width:90%;
 	margin:auto;
+	margin-top:20px;
 	padding:10px;
 	border-radius:10px;
 	line-height:100%;
+	font-size:2em;
+	border:1px solid black;
 }
 
 
@@ -156,25 +175,21 @@ body {
 	margin:10px;
 	background:white;
 	border-radius:10px;
+	display: flex;
+ 	flex-direction: column; 
 }
 
-.answer_prompt{
 
-}
 
 .answer_area{
-	text-indent:50px;
 	width:100%;
 	margin-bottom:10px;
 	
 }
 
-.almost{
-	color:#8daa00;
-}
 
 .interaction{
-	margin-left:85%;
+	text-align:right;
 }
 
 button{

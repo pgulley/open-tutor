@@ -30,14 +30,20 @@ class StudentModel():
 			kc_links = random.sample(kc_links, 2)
 			chapter_links = random.sample(chapter_links, 3)
 			kc_links.extend(chapter_links)
-			return kc_links
+			recs = kc_links
 
 		else:
-			return random.sample(chapter_links, 5)
+			recs = random.sample(chapter_links, 5)
 
-	def set_kc(self, kc):
+		self.recs = {k.id:k for k in recs}
+
+		return recs
+
+
+	def set_kc(self, kc_id):
+		kc = self.recs[kc_id]
 		self.kc = kc
-		self.chapter = kc.chapter
+		self.chapter = f"chapter {kc.chapter}"
 
 	def record_action(self,agent, text):
 		self.history.append({

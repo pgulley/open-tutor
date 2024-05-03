@@ -14,5 +14,13 @@ We use the content in the knowledge graph to generate prompts to an LLM, driving
 One 'inner loop' of the tutor execution sees at least one feedback cycle with the student. The 'outerloop' corresponds to how the KG is navigated. 
 Still figuring out exactly how the student model updates to reflect inner loop performance- but that's an ok open space for a class demo. 
 
+Right now I have pretty good performance using openai's gpt2-turbo model in "completion" mode. Ideally, I think, this would be able to ship with a local huggingface model- in the open source spirit. 
+
 ## The UI
-This is mostly unimplimented right now. The plan will be to impliment the UI as a strictly "add-to" document. I think this will be straightforward to impliment with a Vue app- but that will come next time. 
+The plan will be to impliment the UI as a strictly "add-to" document. 
+So far I've implimented the first kc selection prompt, and am successfully interfacing with openai and getting that content into the browser.
+Next step is just taking the user response and passing that back to the api.
+I might need to actually draw out the state diagram somewhere- as the user experience is mostly managed at the ui level.
+
+I'll spend some time sprucing things up- spinners and timings and all of that come next. 
+The Learning Objectives have largely not been implemented- might have to have a component for the badges. 

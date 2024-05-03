@@ -1,4 +1,5 @@
 import random
+import uuid
 
 class KC():
     #Knowledge Component. 
@@ -8,6 +9,7 @@ class KC():
     definition: str
 
     def __init__(self, chapter, title, definition):
+        self.id = uuid.uuid4().hex
         self.chapter = chapter
         self.title = title
         self.definition = definition
@@ -18,6 +20,7 @@ class KC():
             "Apply":0,
             "Analyze":0
         }
+        
 
     def get_context(self):
         if len(self.context) == 0:
@@ -27,6 +30,13 @@ class KC():
 
     def __repr__(self):
         return f"{self.title} : {self.definition[:20]}..."
+
+    def json(self):
+        return {
+        'id':self.id,
+        'title':self.title,
+        'learning_objectives':self.learning_objectives
+        }
 
 class ContentExample():
     #A piece of sample text using the KC
