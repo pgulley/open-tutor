@@ -21,6 +21,8 @@ class StudentModel():
 		self.history = []
 
 	def get_recs(self):
+		#Lots of little things to improve once we have learning objectives making more sense. 
+
 		#For now we'll just give a few options sort of randomly selected
 		kc_links = [i for i in self.KG[self.kc] if type(i) != str]
 
@@ -52,6 +54,12 @@ class StudentModel():
 			"text":text
 		})
 
+	def graded(self, grade):
+		##This method will update the currently active kc based on the recieved grade. 
+		#If >.8, the current lo and any subsidiary ones will be incremented a good deal
+		#etc...
+
+		pass
 
 class TutorModel():
 	#This guy mostly just manages talking to openai

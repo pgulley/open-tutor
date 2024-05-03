@@ -34,5 +34,13 @@ def evaluate_response():
 	grade = TM.evaluate_response(response)
 	return grade
 
+@app.route("/reference_answer")
+def get_answer():
+	return {"reference_answer": TM.reference_answer}
 
+##Eventually a:
+"""
+def final_grade():
+	SM.graded(request.data.decode())
 
+"""

@@ -17,6 +17,9 @@
 					
 		</lesson>
 	</div>
+	<div class="padding">
+
+	</div>
 
 	<script>
 	const { createApp, ref } = Vue
@@ -52,7 +55,7 @@
 	app.component("lesson", {
 	  	props:['kc_options'],
 	  	template:`
-		  	<div class="lesson">
+		  	<div class="lesson" ref='lesson'>
 				<div class="comfortaa lesson_header">
 					Select a lesson
 				</div>
@@ -69,13 +72,12 @@
 				</InnerLoop>
 			</div>`,
 		mounted(){
-			console.log(this.kc_options)
+			this.scrollTo()
 		},
 		data(){
 			return{
 				selected:false,
 				selected_kc:"",
-
 			}
 		},
 		methods:{
@@ -84,10 +86,16 @@
 					this.selected_kc = kc
 					this.selected = true
 				}
+				for(kc of this.kc_options){
+					kc["is_active"] = false
+				}
 			},
 			handleNext(){
 				this.$emit("next_question")
-			}
+			},
+			scrollTo() {
+		      this.$refs.lesson.scrollIntoView({ behavior: 'smooth', block: 'start', inline:'nearest' });
+		    }
 		}
 	})
 
@@ -112,7 +120,7 @@
 	})
 
 	app.component("KC", {
-	  	props:["title", "id"],
+	  	props:["title", "id", "is_active"],
 	  	template:`<div class="task_hero" :style="{ 'background-color': bg }" @click="select">
 			<div class="icon_column">
 				<span class="material-symbols-outlined lo_icon icon_ok">emoji_objects</span>
@@ -143,6 +151,10 @@
 			select(){
 				this.was_chosen = true
 				this.$emit('selected', this)
+			},
+			postSelect(){
+				this.is_active = false
+				this.bg = this.getBg()
 			}
 		},
 		mounted(){
@@ -153,85 +165,127 @@
 	app.component("InnerLoop",{
 	  	props:["kc"],
 	  	template:`
-	  	<div class="question_title comfortaa" :style="{ 'background-color': bg }"> 
-			<span class="material-symbols-outlined lo_icon icon_header icon_active">architecture</span> Knowledge: {{ kc.title }}
-		</div>
-		<div class="task_container">
-			<Interaction v-for="i in interactions"
-				:kc_id=i.kc_id
-				:type=i.type
-				:student_text=i.student_text
-				@submitted='handleSubmitted'
-				@next_question="handleNext">
-			</Interaction>
+	  	<div class="inner_loop" ref="inner_loop">
+		  	<div class="question_title comfortaa" :style="{ 'background-color': bg }" > 
+				<span class="material-symbols-outlined lo_icon icon_header icon_active">architecture</span> Knowledge: {{ kc.title }}
+			</div>
+			<div class="task_container">
+				<Interaction v-for="i in interactions"
+					:kc_id=i.kc_id
+					:type=i.type
+					:student_text=i.student_text
+					:i=i.i
+					@submitted='handleSubmitted'
+					@next_question="handleNext"
+					@ask_for_answer="handleAsk">
+				</Interaction>
+			</div>
 		</div>
 	  	`,
 	  	mounted(){
 	  		this.bg = hash_to_bg(this.kc.id)
+	  		this.scrollTo()
 	  	
 	  	},
 	  	data(){
 			return{
 				bg: "",
-				interactions:[{type:"question", kc_id:this.kc.id, student_text:""}]
+				interactions:[{type:"question", kc_id:this.kc.id, student_text:"", i:0}],
+				i:0
 			}
 		},
 		methods:{
 			handleSubmitted(response){
-				console.log(response)
-				this.interactions.push({type:"feedback", kc_id:this.kc.id, student_text:response})
-				
+				this.i++
+				this.interactions.push({type:"feedback", kc_id:this.kc.id, student_text:response, i:this.i})
 			},
 			handleNext(){
 				this.$emit("next_question")
-			}
+			},
+			handleAsk(){
+				this.i++
+				this.interactions.push({type:"answer", kc_id:this.kc.id, student_text:"", i:this.i})
+			},
+			scrollTo() {
+		      this.$refs.inner_loop.scrollIntoView({ behavior: 'smooth', block: 'start', inline:'nearest' })
+		    }
 		}
 	})
 
 	
 	app.component("Interaction", {
-	 	props:['type', 'kc_id', 'student_text'],
+	 	props:['type', 'kc_id', 'student_text', "i"],
 	 	template:`
-	 	<div class="question kode-mono-llm">
+	 	<div class="question kode-mono-llm"  ref="question">
+	 		<div v-if="loading">
+	 			<span class="loader"></span>
+	 		</div>
+	 		<span v-if="sentiment" class="material-symbols-outlined" :style="{'color': status_color}">  {{ sentiment}} </span>
 			{{ tutor_text }}	
 		</div>
 		
 		<div v-if="student_ready" class="answer crimson-text-regular">
-			
-			<textarea class="answer_area crimson-text-regular" placeholder="Answer:" v-model="student_response"> </textarea>
-			<div class="interaction "> <button @click="submit"> Submit </button> </div>
+			<span v-if="active">
+
+				<textarea class="answer_area crimson-text-regular" 
+						placeholder="Answer:"
+						v-model="student_response"  
+						v-on:keyup.enter="onEnter"> 
+				</textarea>
+				 
+				<div class="interaction "> 
+					<button v-if="offer_hint" @click="answer" :class="{inactive : !active}"> See Answer </button> 
+					<button @click="submit"> Submit </button> 
+				</div>
+
+			</span>
+			<span v-else>
+				<div class="answer_area crimson-text-regular">  "{{ student_response}}" </div>
+			</span>
 		</div>
+
 		<div v-if="correct" class="answer comfortaa">
-			<div class="interaction"> <button @click="next"> Next Question </button> </div>
+			<div class="interaction"> 
+				<button @click="next" :class="{inactive : !active}"> Next Question </button> 
+			</div>
 		</div>
 	 	`,
 	 	methods:{
 	 		async getQuestion(){
-	  			
+	  			this.feedback = false
+	  			this.get_sentiment()
 	  			const res = await fetch("http://127.0.0.1:5000/choose_kc", {method:"POST", body:this.kc_id})
 				const finalRes = await res.json()
-				
+				this.loading = false
+
 				for(letter of finalRes["question"]){
 					await delay(20)
 					this.tutor_text += letter
 				}
+
 				await delay(50)
 				this.student_ready = true
 	  		},
 
 	  		async getFeedback(){
-	  			
+	  			this.feedback = true
 	  			
 	  			res = await(fetch("http://127.0.0.1:5000/student_response", {method:"POST", body:this.student_text}))
 				finalRes = await res.json()
+				this.loading = false
 
+				this.get_sentiment(finalRes["grade"])
 				for(letter of finalRes["comment"]){
 					await delay(20)
 					this.tutor_text += letter
 				}
 
 				await delay(50)
-				console.log(finalRes)
+				
+				if(this.i >= 2){
+					this.offer_hint = true
+				}
+				
 				switch(finalRes["grade"]){
 					case "Correct":
 						this.correct = true
@@ -247,31 +301,107 @@
 						break
 
 				}	
+				this.scrollTo()
 	  		},
+	  		async getAnswer(){
+	  			this.feedback = true
+	  			this.get_sentiment()
+	  			res = await(fetch("http://127.0.0.1:5000/reference_answer"))
+	  			finalRes = await res.json()
+	  			this.loading = false
 
-	  		async submit(){
+	  			output = "The reference answer generated was: "+finalRes["reference_answer"]
+	  			for(letter of output){
+					await delay(20)
+					this.tutor_text += letter
+				}
+				this.correct = true
+				this.offer_hint = false
+
+
+	  		},
+	  		onEnter(){
+	  			if( this.active ){
+	  				this.submit()
+	  			}
+	  		},
+	  		submit(){
+	  			this.student_text = this.student_response
 	  			this.$emit("submitted", this.student_response)
+	  			this.active = false
+	  		},
+	  		answer(){
+	  			this.student_response = "Student asked for answer:"
+	  			this.active = false
+	  			this.$emit("ask_for_answer")
 	  		},
 	  		next(){
-	  			this.$emit("next_question")
-	  		}
+	  			if(this.active){
+	  				this.$emit("next_question")
+	  				this.active = false
+	  			}
+	  		},
+	  		get_sentiment(grade){
+	  			switch(this.type){
+	  				case "feedback":
+			  			switch(grade){
+			  				case "Correct":
+			  					this.sentiment = "sentiment_excited"
+			  					this.status_color = "green"
+			  					break;
+			  				case "Almost":
+			  					this.sentiment = "sentiment_satisfied"
+			  					this.status_color = "orange"
+			  					break;
+			  				case "Incorrect":
+			  					this.sentiment = "sentiment_neutral"
+			  					break;
+		  				}
+		  				break;
+		  			case "question":
+		  				this.sentiment = "contact_support"
+		  				break;
+
+		  			case "answer":
+		  				this.sentiment = "person_raised_hand"
+		  				break;
+
+
+	  			}
+
+	  			
+	  		},
+	  		scrollTo() {
+	  		  // This doesn't work as intended so leave it out right now
+		      //this.$refs.question.scrollIntoView({ behavior: 'smooth', block: 'end' });
+		    }
 	 	},
 	 	mounted(){
 	 		switch(this.type){
 	 			case "question":
 	 				this.getQuestion()
+	 				break;
+
 	 			case "feedback":
 	 				this.getFeedback()
+	 				break;
+
+	 			case "answer":
+	 				this.getAnswer()
+	 				break;
 	 		}
 	 	},
 	 	data(){
 	 		return{
+	 			loading:true,
+	 			active:true,
 	 			student_ready:false,
 	 			submitted:false,
 	 			correct:false,
+	 			feedback:false,
+	 			offer_hint:false,
 	 			tutor_text:"",
 	 			student_response:""
-
 	 		}
 	 	}
 	})
@@ -281,13 +411,13 @@
 		switch( parseInt(hash)%3 ){
 			case 0:
 				return '#7aba99'
-				break
+
 			case 1:
 				return '#b57f9b'
-				break
+
 			case 2:
 				return '#7593af'
-				break
+	
 			}		
 		}
 
