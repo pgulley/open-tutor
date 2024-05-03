@@ -11,7 +11,9 @@
 
 	<div id="app">
 		<lesson v-for="l in lessons"
-				:kc_options=l.kc_options>
+				:kc_options=l.kc_options
+				@next_question=handleNext
+				>
 					
 		</lesson>
 	</div>
@@ -31,11 +33,20 @@
 				const res = await fetch("http://127.0.0.1:5000/get_recs");
 				const finalRes = await res.json();
 				this.lessons = [{kc_options:finalRes}]
+	  		},
+	  		async handleNext(){
+	  			
+	  			const res = await fetch("http://127.0.0.1:5000/get_recs");
+				const finalRes = await res.json();
+				console.log(finalRes)
+				this.lessons.push({kc_options:finalRes})
+				console.log(this.lessons)
 	  		}
 	  	},
 	  	mounted(){
 	  		this.getFirstLessons()
 	  	}
+
 	})
 
 	app.component("lesson", {
@@ -52,7 +63,9 @@
 					@selected='handleKcSelected'
 				>
 				</KC>
-				<InnerLoop v-if="selected" :kc=selected_kc> 
+				<InnerLoop v-if="selected"
+						 :kc=selected_kc
+						 @next_question="handleNext">> 
 				</InnerLoop>
 			</div>`,
 		mounted(){
@@ -70,16 +83,18 @@
 				if(!this.selected){
 					this.selected_kc = kc
 					this.selected = true
-				}	
-
+				}
+			},
+			handleNext(){
+				this.$emit("next_question")
 			}
 		}
 	})
 
 	///UNDER CONSTRUCTION I GUESS
 	app.component("LearningObjective",{
-		props:["level", "status"]
-		template:`<span class="material-symbols-outlined lo_icon" :class="status">{{ symbol_name() }}</span>`
+		props:["level", "status"],
+		template:`<span class="material-symbols-outlined lo_icon" :class="status">{{ symbol_name() }}</span>`,
 		methods:{
 			symbol_name(){
 				switch(this.level){
@@ -92,12 +107,12 @@
 					case "analyze":
 						return "psychology"
 				}
-			}
+			},
 		}
 	})
 
 	app.component("KC", {
-	  	props:["title", "id", "is_active"],
+	  	props:["title", "id"],
 	  	template:`<div class="task_hero" :style="{ 'background-color': bg }" @click="select">
 			<div class="icon_column">
 				<span class="material-symbols-outlined lo_icon icon_ok">emoji_objects</span>
@@ -111,22 +126,22 @@
 		</div>`,
 		data(){
 			return{
+				is_active:true,
 				was_chosen: false,
 				bg: ""
 			}
 		},
 		methods:{
 			getBg(){
-				if(this.is_chosen || this.is_active){
+				if(this.was_chosen || this.is_active){
 					return hash_to_bg(this.id)
 				}
 				else{
 					return "#DF1203"
 				}
-				
 			},
 			select(){
-				this.is_chosen = true
+				this.was_chosen = true
 				this.$emit('selected', this)
 			}
 		},
@@ -144,7 +159,10 @@
 		<div class="task_container">
 			<Interaction v-for="i in interactions"
 				:kc_id=i.kc_id
-				:type=i.type>
+				:type=i.type
+				:student_text=i.student_text
+				@submitted='handleSubmitted'
+				@next_question="handleNext">
 			</Interaction>
 		</div>
 	  	`,
@@ -155,23 +173,36 @@
 	  	data(){
 			return{
 				bg: "",
-				interactions:[{type:"question", kc_id:this.kc.id}]
+				interactions:[{type:"question", kc_id:this.kc.id, student_text:""}]
 			}
 		},
+		methods:{
+			handleSubmitted(response){
+				console.log(response)
+				this.interactions.push({type:"feedback", kc_id:this.kc.id, student_text:response})
+				
+			},
+			handleNext(){
+				this.$emit("next_question")
+			}
+		}
 	})
 
 	
 	app.component("Interaction", {
-	 	props:['type', 'kc_id'],
+	 	props:['type', 'kc_id', 'student_text'],
 	 	template:`
 	 	<div class="question kode-mono-llm">
 			{{ tutor_text }}	
 		</div>
 		
-		<div v-if="loaded" class="answer crimson-text-regular">
+		<div v-if="student_ready" class="answer crimson-text-regular">
 			
-			<textarea class="answer_area crimson-text-regular" placeholder="Answer:"> </textarea>
-			<div class="interaction "> <button> Submit </button> </div>
+			<textarea class="answer_area crimson-text-regular" placeholder="Answer:" v-model="student_response"> </textarea>
+			<div class="interaction "> <button @click="submit"> Submit </button> </div>
+		</div>
+		<div v-if="correct" class="answer comfortaa">
+			<div class="interaction"> <button @click="next"> Next Question </button> </div>
 		</div>
 	 	`,
 	 	methods:{
@@ -185,17 +216,61 @@
 					this.tutor_text += letter
 				}
 				await delay(50)
-				this.loaded = true
+				this.student_ready = true
 	  		},
+
+	  		async getFeedback(){
+	  			
+	  			
+	  			res = await(fetch("http://127.0.0.1:5000/student_response", {method:"POST", body:this.student_text}))
+				finalRes = await res.json()
+
+				for(letter of finalRes["comment"]){
+					await delay(20)
+					this.tutor_text += letter
+				}
+
+				await delay(50)
+				console.log(finalRes)
+				switch(finalRes["grade"]){
+					case "Correct":
+						this.correct = true
+						this.student_ready = false
+						break
+
+					case "Almost":
+						this.student_ready = true
+						break
+
+					case "Incorrect":
+						this.student_ready = true
+						break
+
+				}	
+	  		},
+
+	  		async submit(){
+	  			this.$emit("submitted", this.student_response)
+	  		},
+	  		next(){
+	  			this.$emit("next_question")
+	  		}
 	 	},
 	 	mounted(){
-	 		this.getQuestion()
+	 		switch(this.type){
+	 			case "question":
+	 				this.getQuestion()
+	 			case "feedback":
+	 				this.getFeedback()
+	 		}
 	 	},
 	 	data(){
 	 		return{
-	 			loaded:false,
+	 			student_ready:false,
 	 			submitted:false,
-	 			tutor_text:""
+	 			correct:false,
+	 			tutor_text:"",
+	 			student_response:""
 
 	 		}
 	 	}
@@ -206,10 +281,13 @@
 		switch( parseInt(hash)%3 ){
 			case 0:
 				return '#7aba99'
+				break
 			case 1:
 				return '#b57f9b'
+				break
 			case 2:
 				return '#7593af'
+				break
 			}		
 		}
 

@@ -6,7 +6,6 @@ app = Flask(__name__, template_folder=".")
 SM = StudentModel()
 TM = TutorModel()
 
-
 @app.route("/")
 def main():
    return send_file("main.html")
@@ -28,13 +27,12 @@ def choose_kc():
 	return {"question":TM.question}
 
 
-"""Unimplemented:
-
-def evaluate_response(response):
+@app.route("/student_response", methods=["POST"])
+def evaluate_response():
+	response = request.data.decode()
 	SM.record_action("student", response)
-	TM.evaluate_response(response)
-	#this whole biz ain't implimented in the model
+	grade = TM.evaluate_response(response)
+	return grade
 
-"""
 
 
