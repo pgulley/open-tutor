@@ -38,7 +38,7 @@ The Learning Objectives have largely not been implemented- might have to have a 
 ### these remaining things are not really neccesary but if the chance comes around
 [] Css scroll snapping for individual text output - maybe unneccesary
 [] "inactive" state for KC selection
-[] Better colors overall
+[] Better colors overall?
 
 
 # Next steps for functionality

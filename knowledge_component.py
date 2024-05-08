@@ -1,5 +1,29 @@
 import random
 import uuid
+from enum import Enum
+
+class Objectives(Enum):
+    Knowledge = 1
+    Understand = 2
+    Apply = 3
+    Analyze = 4
+
+class LO():
+    def __init__(self, objective):
+        self.title = objective.name
+        self.ok = False #Mastered
+        self.active = False #Currently under study
+        self.grade = 0 #Track some bayseian nonsense, tbd
+
+    def json(self):
+        return {
+            "title":self.title,
+            "active":self.active,
+            "ok": self.ok,
+            "grade":self.grade
+        }
+
+
 
 class KC():
     #Knowledge Component. 
@@ -14,13 +38,11 @@ class KC():
         self.title = title
         self.definition = definition
         self.context = []
-        self.learning_objectives = {
-            "Knowledge":0,
-            "Understand":0,
-            "Apply":0,
-            "Analyze":0
-        }
-        
+
+        self.learning_objectives = {o.name:LO(o) for o in list(Objectives)}
+        self.learning_objectives["Knowledge"].active = True
+
+
 
     def get_context(self):
         if len(self.context) == 0:
@@ -35,7 +57,8 @@ class KC():
         return {
         'id':self.id,
         'title':self.title,
-        'learning_objectives':self.learning_objectives
+        'learning_objectives':[self.learning_objectives[o.name].json() for o in list(Objectives)] 
+
         }
 
 class ContentExample():

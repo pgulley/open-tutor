@@ -41,9 +41,9 @@
 	  			
 	  			const res = await fetch("http://127.0.0.1:5000/get_recs");
 				const finalRes = await res.json();
-				console.log(finalRes)
+
 				this.lessons.push({kc_options:finalRes})
-				console.log(this.lessons)
+
 	  		}
 	  	},
 	  	mounted(){
@@ -62,6 +62,7 @@
 				<KC v-for="k in kc_options "
 						:title=k.title
 						:id=k.id
+						:kc=k
 						:is_active=true
 					@selected='handleKcSelected'
 				>
@@ -101,32 +102,40 @@
 
 	///UNDER CONSTRUCTION I GUESS
 	app.component("LearningObjective",{
-		props:["level", "status"],
-		template:`<span class="material-symbols-outlined lo_icon" :class="status">{{ symbol_name() }}</span>`,
+		props:["title", "active", "ok", "header"],
+		template:`<span class="material-symbols-outlined lo_icon" :class='{icon_ok: ok, icon_active: active, icon_header: header}'> {{ symbol }}</span>`,
 		methods:{
 			symbol_name(){
-				switch(this.level){
-					case "knowledge":
+				switch(this.title){
+
+					case "Knowledge":
 						return "emoji_objects"
-					case "understand":
+					case "Understand":
 						return "search_check"
-					case "apply":
+					case "Apply":
 						return "architecture"
-					case "analyze":
+					case "Analyze":
 						return "psychology"
 				}
 			},
+		},
+		data(){
+			return {
+				symbol:this.symbol_name()
+			}
 		}
 	})
 
 	app.component("KC", {
-	  	props:["title", "id", "is_active"],
+	  	props:["title", "id", "is_active", "kc"],
 	  	template:`<div class="task_hero" :style="{ 'background-color': bg }" @click="select">
 			<div class="icon_column">
-				<span class="material-symbols-outlined lo_icon icon_ok">emoji_objects</span>
-				<span class="material-symbols-outlined lo_icon icon_active">search_check</span>
-				<span class="material-symbols-outlined lo_icon">architecture</span>
-				<span class="material-symbols-outlined lo_icon">psychology</span>
+				<LearningObjective 
+					 v-for="(objective, objective_title) in this.kc.learning_objectives"
+					:title=objective.title
+					:active=objective.active
+					:ok=objective.ok
+				>
 			</div>
 			<div class="kc_title comfortaa">
 				 {{ title }}
@@ -150,7 +159,7 @@
 			},
 			select(){
 				this.was_chosen = true
-				this.$emit('selected', this)
+				this.$emit('selected', this.kc)
 			},
 			postSelect(){
 				this.is_active = false
@@ -167,7 +176,14 @@
 	  	template:`
 	  	<div class="inner_loop" ref="inner_loop">
 		  	<div class="question_title comfortaa" :style="{ 'background-color': bg }" > 
-				<span class="material-symbols-outlined lo_icon icon_header icon_active">architecture</span> Knowledge: {{ kc.title }}
+		  		<LearningObjective 
+		  			:title=activeLo.title
+		  			:active=true
+		  			:header=true
+		  		>
+		  		</LearningObjective>
+				{{ activeLo.title }}: {{ kc.title }}
+				
 			</div>
 			<div class="task_container">
 				<Interaction v-for="i in interactions"
@@ -191,7 +207,8 @@
 			return{
 				bg: "",
 				interactions:[{type:"question", kc_id:this.kc.id, student_text:"", i:0}],
-				i:0
+				i:0,
+				activeLo:this.getActiveLo()
 			}
 		},
 		methods:{
@@ -208,7 +225,14 @@
 			},
 			scrollTo() {
 		      this.$refs.inner_loop.scrollIntoView({ behavior: 'smooth', block: 'start', inline:'nearest' })
-		    }
+		    },
+		    getActiveLo(){
+		    	for(lo of this.kc.learning_objectives){
+		    		if(lo.active){
+		    			return lo
+		    		}
+		    	}
+			},
 		}
 	})
 
@@ -220,6 +244,7 @@
 	 		<div v-if="loading">
 	 			<span class="loader"></span>
 	 		</div>
+
 	 		<span v-if="sentiment" class="material-symbols-outlined" :style="{'color': status_color}">  {{ sentiment}} </span>
 			{{ tutor_text }}	
 		</div>
@@ -411,14 +436,12 @@
 		switch( parseInt(hash)%3 ){
 			case 0:
 				return '#7aba99'
-
 			case 1:
 				return '#b57f9b'
-
 			case 2:
 				return '#7593af'
-	
-			}		
+			}
+			return '#fbcb74'
 		}
 
 	//components:

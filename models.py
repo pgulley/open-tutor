@@ -23,7 +23,7 @@ class StudentModel():
 	def get_recs(self):
 		#Lots of little things to improve once we have learning objectives making more sense. 
 
-		#For now we'll just give a few options sort of randomly selected
+		#For now we'll just give a few options randomly selected
 		kc_links = [i for i in self.KG[self.kc] if type(i) != str]
 
 		chapter_links = [i for i in self.KG[self.chapter] if type(i) != str]
@@ -138,6 +138,7 @@ class TutorModel():
 
 
 if __name__ == "__main__":
+	##little demo loop for testing
 	sm = StudentModel()
 	tm = TutorModel()
 
