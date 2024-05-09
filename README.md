@@ -1,3 +1,14 @@
+Shield: [![CC BY 4.0][cc-by-shield]][cc-by]
+
+This work is licensed under a
+[Creative Commons Attribution 4.0 International License][cc-by].
+
+[![CC BY 4.0][cc-by-image]][cc-by]
+
+[cc-by]: http://creativecommons.org/licenses/by/4.0/
+[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
+[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+
 # open-tutor
 Final Project for CS690, Intelligent Tutors. 
 
@@ -18,24 +29,10 @@ Still figuring out exactly how the student model updates to reflect inner loop p
 Right now I have pretty good performance using openai's gpt3-turbo model in "completion" mode. Ideally, I think, this would be able to ship with a local huggingface model- in the open source spirit. 
 
 ## The UI
-The plan will be to impliment the UI as a strictly "add-to" document. 
-So far I've implimented the first kc selection prompt, and am successfully interfacing with openai and getting that content into the browser.
-Next step is just taking the user response and passing that back to the api.
-
-I'll spend some time sprucing things up- spinners and timings and all of that come next. 
-The Learning Objectives have largely not been implemented- might have to have a component for the badges. 
 
 
 
-# Next Steps for polish- 
-
-[X] Spinners, or maybe just throbbing elipsis for when awaiting the tutor response
-[X] Css scroll snapping for lesson headers
-[X] "inactive" states for student responses 
-[X] Better Buttons
-[X] "Enter" interaction instead of just submit
-[X] feedback status colors and other interactions
-### these remaining things are not really neccesary but if the chance comes around
+# Next Steps for polish-  
 [] Css scroll snapping for individual text output - maybe unneccesary
 [] "inactive" state for KC selection
 [] Better colors overall?
