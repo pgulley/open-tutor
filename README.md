@@ -34,16 +34,24 @@ Right now I have pretty good performance using openai's gpt3-turbo model in "com
 
 # Next Steps for polish-  
 [] Css scroll snapping for individual text output - maybe unneccesary
+
 [] "inactive" state for KC selection
+
 [] Better colors overall?
 
 
 # Next steps for functionality
 
 [X] Inner-loop timeouts - if still incorrect or almost after so many tries, should be able to just give up
+
 [X] Option to see the correct answer after some number of tries.
+
 [] Grading feedback to the model
+
 [] More sophisticated graph navigation, including changing learning objectives. 
+
 [] More sophisticated graph structure
+
 [] Mastery propogation...
+
 [] Some kind of final output! 
