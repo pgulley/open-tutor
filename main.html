@@ -214,7 +214,13 @@
 		methods:{
 			handleSubmitted(response){
 				this.i++
-				this.interactions.push({type:"feedback", kc_id:this.kc.id, student_text:response, i:this.i})
+				if(this.i < 4){
+					this.interactions.push({type:"feedback", kc_id:this.kc.id, student_text:response, i:this.i})
+				}
+				else{
+					this.interaction.push({type:"final_feedback",kc_id:this.kc.id, student_text:response, i:this.i})
+				}
+				
 			},
 			handleNext(){
 				this.$emit("next_question")

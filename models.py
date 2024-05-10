@@ -79,7 +79,9 @@ class TutorModel():
 	def target_lo(self, term):
 		##Soo really this is going to be a method that determines the learning objective for a given term
 		#but for now we'll just sub it in
-		return "knowledge"
+		print(term)
+		active_lo = [t for t in term.learning_objectives.values() if t.active == True]
+		return active_lo[0].title
 
 	def generate_question(self, term):
 		#Render all the relevant templates,

@@ -40,7 +40,8 @@ class KC():
         self.context = []
 
         self.learning_objectives = {o.name:LO(o) for o in list(Objectives)}
-        self.learning_objectives["Knowledge"].active = True
+
+        self.learning_objectives[random.choice(list(Objectives)).name].active = True
 
 
 
